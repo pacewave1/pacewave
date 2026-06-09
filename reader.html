@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Reader</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Merriweather:wght@400;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0f; --text:#e8ecf2; --muted:#9aa4b2;
+  --accent:#8A2BE2; --glass:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.1); --radius:20px;
+  --font:Inter; --size:18px;
+}
+:root.light{--bg:#f9fafb;--text:#111827;--muted:#6b7280;--glass:rgba(255,255,255,0.95);--border:rgba(0,0,0,0.08)}
+:root.sepia{--bg:#f4ecd8;--text:#3e2f1c;--muted:#7a6a55;--glass:rgba(244,236,216,0.95);--border:rgba(62,47,28,0.15)}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--font),sans-serif;
+  font-size:var(--size); line-height:1.9;
+  transition:background 0.3s, color 0.3s;
+}
+
+/* Top bar */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  backdrop-filter:blur(16px); background:var(--glass);
+  border-bottom:1px solid var(--border);
+  padding:12px 20px; display:flex; justify-content:space-between; align-items:center;
+  transition:transform 0.3s;
+}
+.topbar.hide{transform:translateY(-100%)}
+
+/* Progress */
+.progress{height:4px; background:rgba(255,255,255,0.1); position:sticky; top:62px; z-index:40}
+.progress > div{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#a78bfa); transition:width 0.1s}
+.prog-text{font-size:0.8rem; color:var(--muted); padding:6px 20px}
+
+/* Reader */
+.wrap{max-width:70ch; margin:40px auto; padding:0 20px 120px}
+.meta{margin-bottom:24px; color:var(--muted); font-size:0.9rem}
+h1{font-family:"Playfair Display",serif; font-size:2rem; margin:8px 0; color:var(--text)}
+.reader{
+  background:var(--glass); backdrop-filter:blur(16px);
+  border:1px solid var(--border); border-radius:var(--radius);
+  padding:40px; min-height:60vh;
+  transition:0.3s;
+}
+.reader.distraction{border:0; background:transparent; padding:20px 0; box-shadow:none}
+.reader p{margin-bottom:1.2em}
+.reader mark{background:var(--accent); color:white; padding:2px 4px; border-radius:4px}
+
+/* Controls */
+.controls{display:flex; gap:8px; flex-wrap:wrap; margin:20px 0}
+.btn{
+  padding:10px 14px; border-radius:12px; border:1px solid var(--border);
+  background:var(--glass); color:var(--text); cursor:pointer; font-size:0.9rem;
+  transition:0.2s;
+}
+.btn:hover{background:rgba(138,43,226,0.15)}
+select.btn{font-family:inherit}
+
+/* Bottom nav */
+.bottom-nav{
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+  display:flex; gap:10px; padding:12px 16px;
+  background:var(--glass); backdrop-filter:blur(20px);
+  border:1px solid var(--border); border-radius:999px; z-index:60
+}
+
+/* Highlight menu */
+.highlight-menu{
+  position:absolute; background:var(--glass); backdrop-filter:blur(16px);
+  border:1px solid var(--border); border-radius:12px; padding:6px;
+  display:none; gap:6px; z-index:100
+}
+.highlight-menu button{width:28px; height:28px; border-radius:8px; border:0; cursor:pointer}
+
+.skeleton{
+  background:linear-gradient(90deg,transparent,var(--glass),transparent);
+  background-size:200% 100%; animation:shimmer 1.5s infinite;
+  border-radius:12px; min-height:400px;
+}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+@media(max-width:768px){
+  :root{--size:18px}
+ .reader{padding:28px}
+  h1{font-size:1.6rem}
+@media(min-width:769px){:root{--size:20px}}
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topbar">
+  <div style="font-family:'Playfair Display';font-weight:700">Reader</div>
+  <div style="display:flex;gap:8px">
+    <button class="btn" onclick="toggleTheme()">🌓</button>
+    <button class="btn" onclick="toggleDistraction()">⛶</button>
+    <button class="btn" onclick="saveBookmark()">🔖</button>
+  </div>
+</div>
+
+<div class="progress"><div id="progressBar"></div></div>
+<div class="prog-text"><span id="progressPercent">0%</span> • <span id="chapterInfo">Chapter 1 of 3</span></div>
+
+<main class="wrap">
+  <div class="meta">
+    <div id="bookAuthor">Author Name</div>
+    <h1 id="bookTitle">Book Title</h1>
+    <div id="readTime" style="color:var(--accent)"></div>
+  </div>
+
+  <div class="controls">
+    <select class="btn" id="chapterSelect" onchange="loadChapter()"></select>
+    <select class="btn" id="fontSelect" onchange="changeFont()">
+      <option value="Inter">Inter</option>
+      <option value="Merriweather">Merriweather</option>
+      <option value="Playfair Display">Playfair</option>
+    </select>
+    <input type="range" min="16" max="24" value="18" class="btn" id="sizeSlider" oninput="changeSize(this.value)">
+    <input type="text" placeholder="Search..." class="btn" id="searchBox" oninput="searchText(this.value)">
+  </div>
+
+  <article class="reader skeleton" id="content"></article>
+</main>
+
+<div class="bottom-nav">
+  <button class="btn" onclick="prevChapter()">← Prev</button>
+  <button class="btn" onclick="showBookmarks()">📑</button>
+  <button class="btn" onclick="nextChapter()">Next →</button>
+</div>
+
+<div class="highlight-menu" id="highlightMenu">
+  <button style="background:#8A2BE2" onclick="highlight('#8A2BE2')"></button>
+  <button style="background:#fbbf24" onclick="highlight('#fbbf24')"></button>
+  <button style="background:#34d399" onclick="highlight('#34d399')"></button>
+</div>
+
+<script>
+// Demo book data - replace with your own
+const book = {
+  title: "Atomic Habits",
+  author: "James Clear",
+  chapters: [
+    {name:"Chapter 1: The Power of Tiny Gains", text:"Habits are the compound interest of self-improvement. You do not rise to the level of your goals. You fall to the level of your systems. ".repeat(50)},
+    {name:"Chapter 2: How to Create a New Habit", text:"The 1st Law: Make it Obvious. Stack your new habit on top of an existing one. Implementation intention: I will [BEHAVIOR] at [TIME] in [LOCATION]. ".repeat(50)},
+    {name:"Chapter 3: How to Break a Bad Habit", text:"Inversion of the 1st Law: Make it Invisible. Reduce exposure to cues. The secret is to redesign your life so the actions you want to take are the path of least resistance. ".repeat(50)}
+  ]
+};
+
+let currentChapter = 0;
+let selectedText = "";
+let lastScrollY = 0;
+
+// Init
+function init(){
+  document.getElementById('bookTitle').innerText = book.title;
+  document.getElementById('bookAuthor').innerText = 'by ' + book.author;
+
+  const select = document.getElementById('chapterSelect');
+  book.chapters.forEach((ch,i) => {
+    select.innerHTML += `<option value="${i}">${ch.name}</option>`;
+  });
+
+  // Load saved settings
+  document.documentElement.className = localStorage.getItem('theme') || '';
+  document.getElementById('fontSelect').value = localStorage.getItem('font') || 'Inter';
+  document.getElementById('sizeSlider').value = localStorage.getItem('size') || '18';
+  document.documentElement.style.setProperty('--font', localStorage.getItem('font') || 'Inter');
+  document.documentElement.style.setProperty('--size', (localStorage.getItem('size') || '18') + 'px');
+
+  loadChapter();
+  updateReadTime();
+}
+
+function loadChapter(){
+  currentChapter = parseInt(document.getElementById('chapterSelect').value);
+  const content = document.getElementById('content');
+  content.classList.add('skeleton');
+  setTimeout(() => {
+    content.classList.remove('skeleton');
+    content.innerText = book.chapters[currentChapter].text;
+    updateChapterInfo();
+    restoreProgress();
+  }, 300);
+}
+
+function nextChapter(){
+  if(currentChapter < book.chapters.length - 1){
+    currentChapter++; document.getElementById('chapterSelect').value = currentChapter; loadChapter();
+  }
+}
+function prevChapter(){
+  if(currentChapter > 0){
+    currentChapter--; document.getElementById('chapterSelect').value = currentChapter; loadChapter();
+  }
+}
+
+// Typography
+function changeFont(){
+  const font = document.getElementById('fontSelect').value;
+  document.documentElement.style.setProperty('--font', font);
+  localStorage.setItem('font', font);
+}
+function changeSize(size){
+  document.documentElement.style.setProperty('--size', size + 'px');
+  localStorage.setItem('size', size);
+}
+
+// Theme
+function toggleTheme(){
+  const themes = ['', 'light', 'sepia'];
+  let idx = themes.indexOf(document.documentElement.className);
+  idx = (idx + 1) % 3;
+  document.documentElement.className = themes[idx];
+  localStorage.setItem('theme', themes[idx]);
+}
+
+// Distraction free
+function toggleDistraction(){
+  document.getElementById('content').classList.toggle('distraction');
+  document.getElementById('topbar').classList.toggle('hide');
+}
+
+// Progress + auto-save
+function saveProgress(){
+  localStorage.setItem('progress_ch' + currentChapter, scrollY);
+}
+function restoreProgress(){
+  const pos = localStorage.getItem('progress_ch' + currentChapter);
+  if(pos) setTimeout(() => scrollTo(0, parseInt(pos)), 100);
+}
+
+addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - innerHeight;
+  const pct = h > 0? Math.round((scrollY / h) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPercent').innerText = pct + '%';
+
+  if(scrollY > lastScrollY && scrollY > 100) document.getElementById('topbar').classList.add('hide');
+  else document.getElementById('topbar').classList.remove('hide');
+  lastScrollY = scrollY;
+
+  clearTimeout(window.saveTimeout);
+  window.saveTimeout = setTimeout(saveProgress, 2000);
+});
+
+function updateChapterInfo(){
+  document.getElementById('chapterInfo').innerText = `Chapter ${currentChapter + 1} of ${book.chapters.length}`;
+}
+function updateReadTime(){
+  const words = book.chapters.reduce((t,ch) => t + ch.text.split(' ').length, 0);
+  document.getElementById('readTime').innerText = Math.ceil(words/200) + ' min read';
+}
+
+// Search
+function searchText(query){
+  const content = document.getElementById('content');
+  let text = book.chapters[currentChapter].text;
+  if(query){
+    const regex = new RegExp(`(${query})`, 'gi');
+    content.innerHTML = text.replace(regex, '<mark>$1</mark>');
+  } else {
+    content.innerText = text;
+  }
+}
+
+// Bookmarks + Highlights
+function saveBookmark(){
+  localStorage.setItem('bookmark_ch' + currentChapter, JSON.stringify({pos: scrollY}));
+  alert('Bookmark saved');
+}
+function showBookmarks(){
+  let list = [];
+  for(let i=0; i<book.chapters.length; i++){
+    const bm = localStorage.getItem('bookmark_ch' + i);
+    if(bm) list.push(`Chapter ${i+1}`);
+  }
+  alert(list.length? 'Bookmarks: ' + list.join(', ') : 'No bookmarks yet');
+}
+
+document.addEventListener('mouseup', (e) => {
+  selectedText = window.getSelection().toString().trim();
+  const menu = document.getElementById('highlightMenu');
+  if(selectedText){
+    menu.style.display = 'flex';
+    menu.style.top = e.pageY + 10 + 'px';
+    menu.style.left = e.pageX - 50 + 'px';
+  } else {
+    menu.style.display = 'none';
+  }
+});
+function highlight(color){
+  document.execCommand('backColor', false, color);
+  document.getElementById('highlightMenu').style.display = 'none';
+}
+
+init();
+</script>
+</body>
+  </html>
