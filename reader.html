@@ -89,13 +89,16 @@ select.btn{font-family:inherit}
   :root{--size:18px}
  .reader{padding:28px}
   h1{font-size:1.6rem}
+}
 @media(min-width:769px){:root{--size:20px}}
 </style>
 </head>
 <body>
 
 <div class="topbar" id="topbar">
-  <div style="font-family:'Playfair Display';font-weight:700">Reader</div>
+  <div style="font-family:'Playfair Display';font-weight:700">
+    <a href="index.html" style="color:var(--text);text-decoration:none;cursor:pointer">← Back to Library</a>
+  </div>
   <div style="display:flex;gap:8px">
     <button class="btn" onclick="toggleTheme()">🌓</button>
     <button class="btn" onclick="toggleDistraction()">⛶</button>
@@ -104,7 +107,7 @@ select.btn{font-family:inherit}
 </div>
 
 <div class="progress"><div id="progressBar"></div></div>
-<div class="prog-text"><span id="progressPercent">0%</span> • <span id="chapterInfo">Chapter 1 of 3</span></div>
+<div class="prog-text"><span id="progressPercent">0%</span> • <span id="chapterInfo">Chapter 1 of 1</span></div>
 
 <main class="wrap">
   <div class="meta">
@@ -114,7 +117,6 @@ select.btn{font-family:inherit}
   </div>
 
   <div class="controls">
-    <select class="btn" id="chapterSelect" onchange="loadChapter()"></select>
     <select class="btn" id="fontSelect" onchange="changeFont()">
       <option value="Inter">Inter</option>
       <option value="Merriweather">Merriweather</option>
@@ -128,9 +130,8 @@ select.btn{font-family:inherit}
 </main>
 
 <div class="bottom-nav">
-  <button class="btn" onclick="prevChapter()">← Prev</button>
+  <button class="btn" onclick="goBack()">← Back</button>
   <button class="btn" onclick="showBookmarks()">📑</button>
-  <button class="btn" onclick="nextChapter()">Next →</button>
 </div>
 
 <div class="highlight-menu" id="highlightMenu">
@@ -140,30 +141,38 @@ select.btn{font-family:inherit}
 </div>
 
 <script>
-// Demo book data - replace with your own
-const book = {
-  title: "Atomic Habits",
-  author: "James Clear",
-  chapters: [
-    {name:"Chapter 1: The Power of Tiny Gains", text:"Habits are the compound interest of self-improvement. You do not rise to the level of your goals. You fall to the level of your systems. ".repeat(50)},
-    {name:"Chapter 2: How to Create a New Habit", text:"The 1st Law: Make it Obvious. Stack your new habit on top of an existing one. Implementation intention: I will [BEHAVIOR] at [TIME] in [LOCATION]. ".repeat(50)},
-    {name:"Chapter 3: How to Break a Bad Habit", text:"Inversion of the 1st Law: Make it Invisible. Reduce exposure to cues. The secret is to redesign your life so the actions you want to take are the path of least resistance. ".repeat(50)}
-  ]
-};
+// Shared book data - same as index.html
+const books = [
+  {id:1,title:"Atomic Habits",author:"James Clear",cat:"Self-Help",rating:4.8,cover:"https://picsum.photos/seed/a1/300/400",content:"Habits are the compound interest of self-improvement. You do not rise to the level of your goals. You fall to the level of your systems. ".repeat(200)},
+  {id:2,title:"Project Hail Mary",author:"Andy Weir",cat:"Science",rating:4.9,cover:"https://picsum.photos/seed/a2/300/400",content:"Space exploration meets survival. ".repeat(200)},
+  {id:3,title:"The Silent Patient",author:"Alex Michaelides",cat:"Mystery",rating:4.6,cover:"https://picsum.photos/seed/a3/300/400",content:"A psychological thriller. ".repeat(200)},
+  {id:4,title:"Deep Work",author:"Cal Newport",cat:"Business",rating:4.7,cover:"https://picsum.photos/seed/a4/300/400",content:"Focus in a distracted world. ".repeat(200)},
+  {id:5,title:"Sapiens",author:"Yuval Noah Harari",cat:"History",rating:4.9,cover:"https://picsum.photos/seed/a5/300/400",content:"A brief history of humankind. ".repeat(200)},
+  {id:6,title:"Educated",author:"Tara Westover",cat:"Education",rating:4.8,cover:"https://picsum.photos/seed/a6/300/400",content:"A memoir of learning. ".repeat(200)},
+  {id:7,title:"The Love Hypothesis",author:"Ali Hazelwood",cat:"Romance",rating:4.5,cover:"https://picsum.photos/seed/a7/300/400",content:"Fake dating turns real. ".repeat(200)},
+  {id:8,title:"Dune",author:"Frank Herbert",cat:"Fiction",rating:4.9,cover:"https://picsum.photos/seed/a8/300/400",content:"Desert planet politics. ".repeat(200)},
+];
 
-let currentChapter = 0;
+let currentBook = null;
 let selectedText = "";
 let lastScrollY = 0;
 
 // Init
 function init(){
-  document.getElementById('bookTitle').innerText = book.title;
-  document.getElementById('bookAuthor').innerText = 'by ' + book.author;
-
-  const select = document.getElementById('chapterSelect');
-  book.chapters.forEach((ch,i) => {
-    select.innerHTML += `<option value="${i}">${ch.name}</option>`;
-  });
+  // Get book ID from URL query parameter
+  const params = new URLSearchParams(window.location.search);
+  const bookId = parseInt(params.get('id'));
+  
+  // Find and load the book
+  currentBook = books.find(b => b.id === bookId);
+  
+  if(!currentBook) {
+    document.getElementById('content').innerText = 'Book not found. Please return to the library.';
+    return;
+  }
+  
+  document.getElementById('bookTitle').innerText = currentBook.title;
+  document.getElementById('bookAuthor').innerText = 'by ' + currentBook.author;
 
   // Load saved settings
   document.documentElement.className = localStorage.getItem('theme') || '';
@@ -172,31 +181,19 @@ function init(){
   document.documentElement.style.setProperty('--font', localStorage.getItem('font') || 'Inter');
   document.documentElement.style.setProperty('--size', (localStorage.getItem('size') || '18') + 'px');
 
-  loadChapter();
+  loadContent();
   updateReadTime();
+  restoreProgress();
 }
 
-function loadChapter(){
-  currentChapter = parseInt(document.getElementById('chapterSelect').value);
+function loadContent(){
   const content = document.getElementById('content');
   content.classList.add('skeleton');
   setTimeout(() => {
     content.classList.remove('skeleton');
-    content.innerText = book.chapters[currentChapter].text;
+    content.innerText = currentBook.text || currentBook.content;
     updateChapterInfo();
-    restoreProgress();
   }, 300);
-}
-
-function nextChapter(){
-  if(currentChapter < book.chapters.length - 1){
-    currentChapter++; document.getElementById('chapterSelect').value = currentChapter; loadChapter();
-  }
-}
-function prevChapter(){
-  if(currentChapter > 0){
-    currentChapter--; document.getElementById('chapterSelect').value = currentChapter; loadChapter();
-  }
 }
 
 // Typography
@@ -227,10 +224,12 @@ function toggleDistraction(){
 
 // Progress + auto-save
 function saveProgress(){
-  localStorage.setItem('progress_ch' + currentChapter, scrollY);
+  if(!currentBook) return;
+  localStorage.setItem('progress_book' + currentBook.id, scrollY);
 }
 function restoreProgress(){
-  const pos = localStorage.getItem('progress_ch' + currentChapter);
+  if(!currentBook) return;
+  const pos = localStorage.getItem('progress_book' + currentBook.id);
   if(pos) setTimeout(() => scrollTo(0, parseInt(pos)), 100);
 }
 
@@ -249,17 +248,19 @@ addEventListener('scroll', () => {
 });
 
 function updateChapterInfo(){
-  document.getElementById('chapterInfo').innerText = `Chapter ${currentChapter + 1} of ${book.chapters.length}`;
+  document.getElementById('chapterInfo').innerText = `Reading: ${currentBook.title}`;
 }
 function updateReadTime(){
-  const words = book.chapters.reduce((t,ch) => t + ch.text.split(' ').length, 0);
+  if(!currentBook) return;
+  const words = (currentBook.content || currentBook.text || '').split(' ').length;
   document.getElementById('readTime').innerText = Math.ceil(words/200) + ' min read';
 }
 
 // Search
 function searchText(query){
+  if(!currentBook) return;
   const content = document.getElementById('content');
-  let text = book.chapters[currentChapter].text;
+  let text = currentBook.content || currentBook.text;
   if(query){
     const regex = new RegExp(`(${query})`, 'gi');
     content.innerHTML = text.replace(regex, '<mark>$1</mark>');
@@ -268,18 +269,23 @@ function searchText(query){
   }
 }
 
-// Bookmarks + Highlights
+// Bookmarks
 function saveBookmark(){
-  localStorage.setItem('bookmark_ch' + currentChapter, JSON.stringify({pos: scrollY}));
-  alert('Bookmark saved');
+  if(!currentBook) return;
+  localStorage.setItem('bookmark_book' + currentBook.id, JSON.stringify({pos: scrollY, title: currentBook.title}));
+  alert('Bookmark saved at ' + currentBook.title);
 }
 function showBookmarks(){
   let list = [];
-  for(let i=0; i<book.chapters.length; i++){
-    const bm = localStorage.getItem('bookmark_ch' + i);
-    if(bm) list.push(`Chapter ${i+1}`);
-  }
-  alert(list.length? 'Bookmarks: ' + list.join(', ') : 'No bookmarks yet');
+  books.forEach(b => {
+    const bm = localStorage.getItem('bookmark_book' + b.id);
+    if(bm) list.push(JSON.parse(bm).title);
+  });
+  alert(list.length? 'Bookmarks:\n' + list.join('\n') : 'No bookmarks yet');
+}
+
+function goBack(){
+  window.location.href = 'index.html';
 }
 
 document.addEventListener('mouseup', (e) => {
@@ -301,4 +307,4 @@ function highlight(color){
 init();
 </script>
 </body>
-  </html>
+</html>
