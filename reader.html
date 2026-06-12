@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Reader - Incomplete</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0f; --card:#12141b; --text:#eef2ff; --muted:#94a3b8; --accent:#8A2BE2;
+  --glass:rgba(255,255,255,0.06); --border:rgba(255,255,255,0.1);
+}
+body{margin:0;font-family:Inter,system-ui;background:var(--bg);color:var(--text)}
+.topbar{position:sticky;top:0;background:var(--glass);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--accent)}
+.wrap{max-width:800px;margin:40px auto;padding:0 20px}
+.reader{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:40px;line-height:1.9;font-size:18px;min-height:60vh
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.btn{padding:8px 12px;border:1px solid var(--border);background:var(--glass);border-radius:10px;color:var(--text);cursor:pointer}
+select,input{padding:8px;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:8px}
+.progress{height:4px;background:var(--border);border-radius:2px;margin-top:10px}
+.progress > div{height:100%;width:0;background:var(--accent);border-radius:2px;transition:width.2s}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Premium Reader</div>
+  <button class="btn" onclick="goHome()">← Back</button>
+</div>
+
+<div class="wrap">
+  <div class="controls">
+    <!-- TODO: Add more font options if needed -->
+    <select id="fontSelect" onchange="changeFont()">
+      <option value="Inter">Inter</option>
+      <option value="Georgia">Georgia</option>
+      <option value="Merriweather">Merriweather</option>
+    </select>
+
+    <!-- TODO: Add more size steps -->
+    <input type="range" id="sizeRange" min="16" max="24" value="18" oninput="changeSize(this.value)">
+
+    <!-- TODO: Add sepia/dark themes -->
+    <button class="btn" onclick="toggleTheme()">🌓 Theme</button>
+
+    <!-- TODO: Add search box -->
+    <input type="text" id="searchBox" placeholder="Search..." oninput="searchText(this.value)">
+  </div>
+
+  <div class="progress"><div id="progressBar"></div></div>
+
+  <article class="reader" id="content">
+    <!-- TODO: Load your book content here -->
+    <!-- Option 1: Paste chapters directly -->
+    <!-- Option 2: Fetch from JSON/TXT file -->
+    <h2 id="chapterTitle">Chapter Title</h2>
+    <div id="chapterText">
+      <!-- TODO: Replace with your book text -->
+      <p>Add your chapter content here...</p>
+    </div>
+  </article>
+
+  <div class="controls" style="margin-top:30px;justify-content:center">
+    <button class="btn" onclick="prevChapter()">← Prev</button>
+    <!-- TODO: Make chapter dropdown dynamic -->
+    <select id="chapterSelect" onchange="loadChapter(this.value)"></select>
+    <button class="btn" onclick="nextChapter()">Next →</button>
+  </div>
+</div>
+
+<script>
+// TODO: Define your book data structure here
+const book = {
+  title: "TODO: Your Book Title",
+  author: "TODO: Author Name",
+  // TODO: Add chapters array
+  chapters: [
+    // {name: "Chapter 1", content: "Paste text here..."},
+    // {name: "Chapter 2", content: "Paste text here..."},
+  ]
+};
+
+// TODO: Implement chapter loading logic
+let currentChapter = 0;
+
+function init() {
+  // TODO: Populate chapter dropdown from book.chapters
+  // TODO: Load saved progress from localStorage
+  loadChapter(0);
+}
+
+function loadChapter(index) {
+  // TODO: Set currentChapter = index
+  // TODO: Update #chapterTitle and #chapterText from book.chapters[index]
+  // TODO: Save progress to localStorage
+  updateProgress();
+}
+
+function nextChapter() {
+  // TODO: if currentChapter < book.chapters.length - 1, loadChapter(currentChapter + 1)
+}
+
+function prevChapter() {
+  // TODO: if currentChapter > 0, loadChapter(currentChapter - 1)
+}
+
+function changeFont() {
+  // TODO: Get select value and apply to #content
+}
+
+function changeSize(size) {
+  // TODO: Apply font size to #content
+}
+
+function toggleTheme() {
+  // TODO: Toggle between dark/light/sepia classes on body
+}
+
+function searchText(query) {
+  // TODO: Highlight matching text in #chapterText
+}
+
+function updateProgress() {
+  // TODO: Calculate scroll progress and update #progressBar width
+}
+
+function saveBookmark() {
+  // TODO: Save current scroll position + chapter to localStorage
+}
+
+function loadBookmark() {
+  // TODO: Load saved position from localStorage and scroll
+}
+
+function goHome() {
+  // TODO: Hide reader, show library/home page
+}
+
+// TODO: Add event listener for scroll to update progress
+// window.addEventListener('scroll', updateProgress);
+
+init();
+</script>
+
+</body>
+</html>
