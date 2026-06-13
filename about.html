@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us | PaceWave</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0f; --card:#12141b; --text:#eef2ff; --muted:#94a3b8; 
+  --accent:#8A2BE2; --accent-2:#a78bfa; --border:rgba(255,255,255,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:radial-gradient(1000px 500px at 85% -10%, rgba(139,92,246,0.2), transparent), var(--bg);
+  color:var(--text);
+  line-height:1.8;
+}
+.topbar{
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(16px);background:rgba(10,11,15,0.8);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px;display:flex;justify-content:space-between;align-items:center;
+}
+.brand{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--accent);text-decoration:none;font-weight:700}
+.wrap{max-width:800px;margin:60px auto;padding:0 20px 120px}
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:40px;backdrop-filter:blur(12px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.4);
+}
+h1{
+  font-family:'Playfair Display',serif;font-size:2.4rem;margin-bottom:16px;
+  background:linear-gradient(135deg,#fff,var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+h2{font-size:1.4rem;margin:36px 0 12px;color:var(--accent);font-weight:600}
+p{margin-bottom:14px;color:var(--muted)}
+ul{margin:12px 0 20px 20px;color:var(--muted)}
+li{margin-bottom:8px}
+.btn{
+  display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:white;text-decoration:none;padding:12px 24px;border-radius:999px;
+  font-weight:600;font-size:0.95rem;margin-top:24px;transition:transform .2s;
+}
+.btn:hover{transform:translateY(-2px)}
+.tagline{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--accent);text-align:center;margin-top:40px}
+footer{text-align:center;color:var(--muted);font-size:0.85rem;margin-top:60px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+@media(max-width:640px){
+  .card{padding:24px}
+  h1{font-size:1.8rem}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="index.html" class="brand">PaceWave</a>
+  <a href="index.html" class="btn" style="padding:8px 16px;font-size:0.85rem">← Back to Home</a>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <h1>About Us</h1>
+
+    <p>Welcome to PaceWave, your destination for discovering, reading, and enjoying digital books online.</p>
+
+    <p>At PaceWave, we believe that knowledge, stories, and learning should be accessible to everyone. Our platform is designed to provide a smooth, fast, and enjoyable reading experience for readers across all devices, whether on mobile phones, tablets, or desktops.</p>
+
+    <p>Our mission is to create a modern digital library where readers can easily explore books from different categories, discover new authors, and access content anytime, anywhere.</p>
+
+    <h2>What We Offer</h2>
+    <ul>
+      <li>A growing collection of digital books</li>
+      <li>Easy book discovery and browsing</li>
+      <li>Fast and responsive reading experience</li>
+      <li>Mobile-friendly design</li>
+      <li>Organized book categories</li>
+      <li>Secure and user-friendly platform</li>
+    </ul>
+
+    <h2>Our Vision</h2>
+    <p>To become a trusted online reading platform that connects readers with knowledge and entertainment while making digital reading simple, accessible, and enjoyable.</p>
+
+    <h2>Why Choose PaceWave?</h2>
+    <ul>
+      <li>Modern and clean interface</li>
+      <li>Fast loading speeds</li>
+      <li>Easy navigation</li>
+      <li>Optimized for all devices</li>
+      <li>Continuously expanding library</li>
+    </ul>
+
+    <p>Thank you for being part of the PaceWave community. We are committed to improving our platform and providing the best possible reading experience for our users.</p>
+
+    <a href="reader.html" class="btn">Start Reading →</a>
+
+    <p class="tagline">PaceWave — Read. Learn. Explore.</p>
+  </div>
+
+  <footer>© 2026 PaceWave. All rights reserved.</footer>
+</div>
+
+</body>
+</html>
